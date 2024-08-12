@@ -70,6 +70,15 @@ public abstract class BaseBrushTool : BaseTool
 
 		surface_modified = false;
 		undo_surface = document.Layers.CurrentUserLayer.Surface.Clone ();
+
+		// Must be placed after undo_surface.
+		if (this is PaintBrushTool)
+		{
+			var layer = document.Layers.AddNewLayer("New Stroke");
+			var i = document.Layers.CurrentUserLayerIndex+1;
+			document.Layers.SetCurrentUserLayer(i);
+		}
+
 		mouse_button = e.MouseButton;
 
 		OnMouseMove (document, e);
@@ -77,6 +86,12 @@ public abstract class BaseBrushTool : BaseTool
 
 	protected override void OnMouseUp (Document document, ToolMouseEventArgs e)
 	{
+		// Must be placed before pushing new undo item.
+		if (this is PaintBrushTool)
+		{
+			document.Layers.MergeCurrentLayerDown();
+		}
+
 		if (undo_surface != null && surface_modified) {
 			document.History.PushNewItem (new SimpleHistoryItem (Icon, Name, undo_surface, document.Layers.CurrentUserLayerIndex));
 		}

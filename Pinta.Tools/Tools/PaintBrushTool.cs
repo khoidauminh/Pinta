@@ -103,28 +103,35 @@ public sealed class PaintBrushTool : BaseBrushTool
 				Palette.SecondaryColor.R,
 				Palette.SecondaryColor.G,
 				Palette.SecondaryColor.B,
-				Palette.SecondaryColor.A * active_brush.StrokeAlphaMultiplier
+				1.0
 			),
 			MouseButton.Left or _ => new (
 				Palette.PrimaryColor.R,
 				Palette.PrimaryColor.G,
 				Palette.PrimaryColor.B,
-				Palette.PrimaryColor.A * active_brush.StrokeAlphaMultiplier
+				1.0
 			)
 		};
+		
+		double alphaValue = mouse_button switch {
+			MouseButton.Right     => Palette.SecondaryColor.A,
+			MouseButton.Left or _ => Palette.PrimaryColor.A
+		} * active_brush.StrokeAlphaMultiplier;
+		
+		var currentLayer = document.Layers.CurrentUserLayer;
+		currentLayer.Opacity = alphaValue;
 
 		if (!last_point.HasValue)
 			last_point = e.Point;
 
 		if (document.Workspace.PointInCanvas (e.PointDouble))
 			surface_modified = true;
-
-		var surf = document.Layers.CurrentUserLayer.Surface;
-		var brush_width = BrushWidth;
-
+		
+		var surf = currentLayer.Surface;
+	
 		var g = document.CreateClippedContext ();
 		g.Antialias = UseAntialiasing ? Antialias.Subpixel : Antialias.None;
-		g.LineWidth = brush_width;
+		g.LineWidth = BrushWidth;
 		g.LineJoin = LineJoin.Round;
 		g.LineCap = BrushWidth == 1 ? LineCap.Butt : LineCap.Round;
 		g.SetSourceColor (strokeColor);
