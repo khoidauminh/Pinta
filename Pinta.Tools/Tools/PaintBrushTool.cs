@@ -126,7 +126,7 @@ public sealed class PaintBrushTool : BaseBrushTool
 		g.Antialias = UseAntialiasing ? Antialias.Subpixel : Antialias.None;
 		g.LineWidth = brush_width;
 		g.LineJoin = LineJoin.Round;
-		g.LineCap = BrushWidth == 1 ? LineCap.Butt : LineCap.Round;
+		g.LineCap = BrushWidth == 1 || strokeColor.A < 0.9 ? LineCap.Butt : LineCap.Round;
 		g.SetSourceColor (strokeColor);
 
 		BrushStrokeArgs strokeArgs = new (strokeColor, e.Point, last_point.Value);
